@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
+import { User } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
@@ -14,8 +15,15 @@ export const authOptions: NextAuthOptions = {
       // e.g. domain, username, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" },
+        username: {
+          label: "Username",
+          type: "text",
+          placeholder: "jsmith",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
       },
       async authorize(credentials, req) {
         const { username, password } = credentials as any;
@@ -32,6 +40,8 @@ export const authOptions: NextAuthOptions = {
 
         const user = await res.json();
 
+        console.log({ user });
+
         if (res.ok && user) {
           return user;
         } else return null;
@@ -39,8 +49,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  session: {
-    strategy: "jwt",
+  callbacks: {
+    async jwt({ token, user }) {
+      return { ...token, ...user };
+    },
+    async session({ session, token, user }) {
+      // Send properties to the client, like an access_token from a provider.
+      session.user = token;
+
+      return session;
+    },
   },
 
   pages: {
