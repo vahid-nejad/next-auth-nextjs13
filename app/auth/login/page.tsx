@@ -3,6 +3,7 @@ import Button from "@elements/Button";
 import TextBox from "@elements/TextBox";
 import { signIn } from "next-auth/react";
 import { useRef } from "react";
+import React from "react"
 
 interface IProps {
   searchParams?: { [key: string]: string | string[] | undefined };
@@ -12,7 +13,8 @@ const LoginPage = ({ searchParams }: IProps) => {
   const userName = useRef("");
   const pass = useRef("");
 
-  const onSubmit = async () => {
+  const onSubmit = async (event: React.SyntheticEvent) => {
+    event.preventDefault();
     const result = await signIn("credentials", {
       username: userName.current,
       password: pass.current,
